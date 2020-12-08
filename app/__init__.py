@@ -1,18 +1,21 @@
+"""Initialize app."""
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager
-from config import Config
+from flask_sqlalchemy import SQLAlchemy
+from ddtrace import patch_all
 
+
+patch_all()
 db = SQLAlchemy()
 login_manager = LoginManager()
 
+
 def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)
+    """Construct the core app object."""
+    app = Flask(__name__, instance_relative_config=False)
+    app.config.from_object('config.Config')
 
-    migrate = Migrate(app, db, render_as_batch=True)
-
+    # Initialize Plugins
     db.init_app(app)
     login_manager.init_app(app)
 
@@ -33,8 +36,3 @@ def create_app():
             compile_static_assets(app)
 
         return app
-# from app import models
-# from app.admin import AdminIndexView, CustomAdminView
-
-# admin = Admin(app, name='Speedy Delivery', index_view=AdminIndexView(),
-#               template_mode='bootstrap3')
